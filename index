@@ -1,0 +1,551 @@
+
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eramaa — Ostuosakond</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#1C3D2E;--forest-mid:#2D5A3D;--forest-light:#3D7A52;
+  --gold:#F5C800;--gold-light:#FFD700;
+  --cream:#F7F3EE;--cream-dark:#EDE7DC;
+  --text:#1A1A18;--text-muted:#7A7A70;
+  --white:#FFFFFF;--red:#B84040;--red-light:#F5E0E0;
+  --green-light:#E8F5E9;--border:#DDD8D0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+.topbar{background:var(--forest);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.2);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo img{height:32px;}
+.logo-text{font-size:13px;font-weight:500;color:rgba(255,255,255,.65);letter-spacing:.06em;text-transform:uppercase;}
+.nav{display:flex;gap:2px;}
+.nav-btn{background:transparent;border:none;color:rgba(255,255,255,.55);padding:8px 16px;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:.2s;}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:var(--white);}
+.nav-btn.active{background:var(--gold);color:var(--forest);font-weight:700;}
+.page{display:none;padding:32px;max-width:1140px;margin:0 auto;}
+.page.active{display:block;animation:fadeUp .25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.page-header{margin-bottom:24px;}
+.page-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--forest);margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--text-muted);}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:24px;}
+.kpi{background:var(--white);border-radius:12px;padding:16px 18px;border:1px solid var(--border);position:relative;overflow:hidden;transition:.2s;}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--forest-mid);}
+.kpi.good::before{background:var(--forest-light);}
+.kpi.bad::before{background:var(--red);}
+.kpi.gold::before{background:var(--gold);}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.kpi-val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--forest);}
+.kpi-val.g{color:#2A7A3A;}.kpi-val.r{color:var(--red);}
+.card{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+.card-hd{background:var(--forest);color:var(--white);padding:13px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.card-body{padding:20px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--cream);color:var(--text-muted);font-size:10px;font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);text-transform:uppercase;letter-spacing:.05em;}
+td{padding:11px 14px;border-bottom:1px solid var(--cream-dark);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAFAF8;}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.tag-g{background:var(--green-light);color:#2A7A3A;}
+.tag-r{background:var(--red-light);color:var(--red);}
+.tag-b{background:var(--cream-dark);color:var(--text-muted);}
+.tag-gold{background:#FBF0D3;color:#8A6A10;}
+.pill{font-weight:600;border-radius:8px;padding:4px 10px;display:inline-block;font-size:12px;}
+.pill-g{background:var(--green-light);color:#2A7A3A;}
+.pill-r{background:var(--red-light);color:var(--red);}
+.pill-y{background:#FBF0D3;color:#8A6A10;}
+.bar-wrap{display:flex;align-items:center;gap:8px;}
+.bar-bg{flex:1;height:6px;background:var(--cream-dark);border-radius:3px;overflow:hidden;min-width:50px;}
+.bar-fill{height:100%;border-radius:3px;}
+.bar-pct{font-size:11px;font-weight:700;min-width:36px;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;}
+.form-group input,.form-group select{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);transition:.15s;}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--forest-mid);box-shadow:0 0 0 3px rgba(45,90,61,.1);}
+.form-group input.hi{background:#FFFDF5;border-color:var(--gold);}
+.btn{padding:10px 20px;border-radius:8px;border:none;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:.2s;}
+.btn-primary{background:var(--forest);color:var(--white);}
+.btn-primary:hover{background:var(--forest-mid);}
+.btn-gold{background:var(--gold);color:var(--forest);}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-muted);}
+.btn-ghost:hover{border-color:var(--forest);color:var(--forest);}
+.btn-danger{background:var(--red-light);color:var(--red);border:none;}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px;}
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:14px;font-weight:500;}
+.alert-g{background:var(--green-light);color:#2A7A3A;border-left:3px solid var(--forest-light);}
+.alert-r{background:var(--red-light);color:var(--red);border-left:3px solid var(--red);}
+.alert-y{background:#FBF0D3;color:#8A6A10;border-left:3px solid var(--gold);}
+.asst-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px;}
+.asst-card{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;transition:.2s;}
+.asst-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.08);}
+.asst-card-hd{padding:16px 18px;}
+.asst-card-hd.ostujuht{background:var(--forest);}
+.asst-card-hd.assistent{background:#2A4A38;}
+.asst-card-name{font-family:'DM Serif Display',serif;font-size:18px;color:var(--white);margin-bottom:4px;}
+.asst-card-sub{font-size:11px;color:rgba(255,255,255,.6);}
+.asst-card-body{padding:16px 18px;}
+.asst-stat{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--cream-dark);}
+.asst-stat:last-child{border-bottom:none;}
+.asst-stat-lbl{font-size:12px;color:var(--text-muted);}
+.asst-stat-val{font-size:13px;font-weight:600;}
+.note{font-size:11px;color:var(--text-muted);padding:10px 16px;border-top:1px dashed var(--border);background:var(--cream);}
+.empty{text-align:center;padding:40px;color:var(--text-muted);}
+.empty-icon{font-size:32px;margin-bottom:10px;}
+.section-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+@media(max-width:768px){.topbar{padding:0 16px;}.page{padding:16px;}.kpi-grid{grid-template-columns:1fr 1fr;}.form-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <img src="Eramaa.png" alt="Eramaa">
+    <span class="logo-text">Ostuosakond</span>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showPage('dashboard',this)">Dashboard</button>
+    <button class="nav-btn" onclick="showPage('sisesta',this)">Sisesta</button>
+    <button class="nav-btn" onclick="showPage('tiim',this)">Tiim</button>
+    <button class="nav-btn" onclick="showPage('seaded',this)">Seaded</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div class="page-title">Ülevaade</div>
+    <div class="page-sub" id="dash-sub">Laadimine...</div>
+  </div>
+  <div class="kpi-grid" id="dash-kpi"></div>
+  <div class="card">
+    <div class="card-hd">Kuude tulemuslikkus</div>
+    <table>
+      <thead><tr><th>Kuu</th><th>Eesmärk</th><th>Tegelik</th><th>Täitmine</th><th>Tulemus</th><th>Märkus</th></tr></thead>
+      <tbody id="dash-kuud"></tbody>
+    </table>
+    <div class="note">Nullpunkt = 3 500 tm/kuus &nbsp;|&nbsp; 14 000 € ÷ 4 €/tm</div>
+  </div>
+  <div class="card">
+    <div class="card-hd">Tiimi kokkuvõte</div>
+    <table>
+      <thead><tr><th>Nimi</th><th>Roll</th><th>Kuud</th><th>Pakkumisi</th><th>Diile</th><th>Konversioon</th><th>Tulemus €</th></tr></thead>
+      <tbody id="dash-tiim"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SISESTA -->
+<div class="page" id="page-sisesta">
+  <div class="page-header">
+    <div class="page-title">Sisesta andmed</div>
+    <div class="page-sub">Kuu koondandmed ja tiimi tulemused</div>
+  </div>
+  <div class="card">
+    <div class="card-hd">Kuu koondandmed</div>
+    <div class="card-body">
+      <div id="alert-kuu"></div>
+      <div class="form-grid">
+        <div class="form-group"><label>Kuu</label><select id="f-kuu" onchange="loadKuu()"></select></div>
+        <div class="form-group"><label>Eesmärk (tm)</label><input type="number" id="f-ees" class="hi" placeholder="nt 4000" min="0"></div>
+        <div class="form-group"><label>Tegelik maht (tm)</label><input type="number" id="f-teg" class="hi" placeholder="nt 3777" min="0"></div>
+        <div class="form-group"><label>Kulud €/kuus</label><input type="number" id="f-kul" value="14000" min="0"></div>
+        <div class="form-group"><label>Katetegur (€/tm)</label><input type="number" id="f-kat" value="4" min="0" step="0.1"></div>
+        <div class="form-group"><label>Kommentaar</label><input type="text" id="f-kom" placeholder="vabatahtlik"></div>
+      </div>
+      <div id="kuu-preview" style="margin-bottom:12px;"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveKuu()">Salvesta kuu</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearKuu()">Tühjenda</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">Tiimiliikme kuuandmed</div>
+    <div class="card-body">
+      <div id="alert-tiim"></div>
+      <div class="form-grid">
+        <div class="form-group"><label>Tiimiliige</label><select id="a-nimi"></select></div>
+        <div class="form-group"><label>Kuu</label><select id="a-kuu"></select></div>
+        <div class="form-group"><label>Pakkumisi</label><input type="number" id="a-pakk" class="hi" placeholder="nt 23" min="0"></div>
+        <div class="form-group"><label>Kõneminutid (h)</label><input type="number" id="a-kon" class="hi" placeholder="nt 18.5" min="0" step="0.1"></div>
+        <div class="form-group"><label>Diile arv</label><input type="number" id="a-diil" class="hi" placeholder="nt 2" min="0"></div>
+        <div class="form-group"><label>Diilide nimed</label><input type="text" id="a-dnimed" placeholder="nt Laasu RÕ, Kase RÕ"></div>
+        <div class="form-group"><label>Tulemus bruto (€)</label><input type="number" id="a-tul" class="hi" placeholder="nt 600" min="0"></div>
+        <div class="form-group"><label>Märkus</label><input type="text" id="a-märk" placeholder="vabatahtlik"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveTiim()">Salvesta</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearTiim()">Tühjenda</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TIIM -->
+<div class="page" id="page-tiim">
+  <div class="page-header">
+    <div class="page-title">Tiim</div>
+    <div class="page-sub">Tulemuslikkus tiimiliikme kaupa</div>
+  </div>
+  <div class="asst-grid" id="tiim-cards"></div>
+  <div id="tiim-detail"></div>
+</div>
+
+<!-- SEADED -->
+<div class="page" id="page-seaded">
+  <div class="page-header">
+    <div class="page-title">Seaded</div>
+    <div class="page-sub">Tiim, andmed ja varundamine</div>
+  </div>
+  <div class="card">
+    <div class="card-hd">Tiimiliikmed</div>
+    <div class="card-body">
+      <div class="section-title">Praegune tiim</div>
+      <div id="tiim-list" style="margin-bottom:16px;"></div>
+      <div class="section-title">Lisa uus tiimiliige</div>
+      <div class="form-grid" style="max-width:500px;">
+        <div class="form-group"><label>Nimi</label><input type="text" id="new-nimi" placeholder="Nimi Perekonnanimi"></div>
+        <div class="form-group"><label>Roll</label>
+          <select id="new-roll">
+            <option value="Assistent">Assistent</option>
+            <option value="Ostujuht">Ostujuht</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addTiimiliige()">Lisa tiimiliige</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">Andmete haldus</div>
+    <div class="card-body">
+      <div class="alert alert-y" style="margin-bottom:16px;">Andmed salvestatakse brauserisse. Ekspordi regulaarselt varundamiseks!</div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="exportData()">Ekspordi JSON</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('imp').click()">Impordi JSON</button>
+        <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn btn-danger btn-sm" onclick="clearAll()">Kustuta kõik</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var KUU_ORDER=["Jaanuar 2025","Veebruar 2025","Märts 2025","Aprill 2025","Mai 2025","Juuni 2025","Juuli 2025","August 2025","September 2025","Oktoober 2025","November 2025","Detsember 2025","Jaanuar 2026","Veebruar 2026","Märts 2026","Aprill 2026","Mai 2026","Juuni 2026","Juuli 2026","August 2026","September 2026","Oktoober 2026","November 2026","Detsember 2026"];
+
+var DEF={
+  tiim:[
+    {nimi:"Kristiina Rinne",roll:"Ostujuht"},
+    {nimi:"Tanel Parm",roll:"Assistent"}
+  ],
+  kuud:[
+    {kuu:"Jaanuar 2025",ees:5000,teg:3777,kul:14000,kat:4,kom:""},
+    {kuu:"Veebruar 2025",ees:5000,teg:4885,kul:14000,kat:4,kom:""},
+    {kuu:"Märts 2025",ees:3500,teg:2813,kul:14000,kat:4,kom:""},
+    {kuu:"Aprill 2025",ees:3500,teg:3366,kul:14000,kat:4,kom:""},
+    {kuu:"Mai 2025",ees:4000,teg:2314,kul:14000,kat:4,kom:"Kristiina lisas 1641 tm (Matokese+Jaagu-Antsu+Pulli)"}
+  ],
+  andmed:[
+    {nimi:"Tanel Parm",kuu:"Märts 2025",pakk:35,kon:17.18,diil:0,dnimed:"",tul:0,märk:""},
+    {nimi:"Tanel Parm",kuu:"Aprill 2025",pakk:31,kon:17.22,diil:3,dnimed:"Jaani RÕ, Pakla RÕ, Ilvese RÕ",tul:0,märk:""},
+    {nimi:"Tanel Parm",kuu:"Mai 2025",pakk:20,kon:13.63,diil:1,dnimed:"Ala-Hinnu",tul:0,märk:""},
+    {nimi:"Tanel Parm",kuu:"Juuli 2025",pakk:16,kon:19.83,diil:2,dnimed:"Tralla RÕ, Järvemäe RÕ",tul:600,märk:""},
+    {nimi:"Tanel Parm",kuu:"September 2025",pakk:24,kon:15.03,diil:1,dnimed:"Liivaku ost",tul:250,märk:""},
+    {nimi:"Tanel Parm",kuu:"Oktoober 2025",pakk:17,kon:20.13,diil:3,dnimed:"Härma RÕ, Rae RÕ, Tuulemäe RÕ",tul:1050,märk:"Parim kuu!"},
+    {nimi:"Tanel Parm",kuu:"November 2025",pakk:25,kon:18.43,diil:1,dnimed:"Tiidu RÕ",tul:250,märk:""},
+    {nimi:"Tanel Parm",kuu:"Detsember 2025",pakk:12,kon:17.1,diil:1,dnimed:"Vedu RÕ",tul:250,märk:""},
+    {nimi:"Tanel Parm",kuu:"Jaanuar 2026",pakk:24,kon:21.03,diil:1,dnimed:"Sabali RÕ",tul:250,märk:""},
+    {nimi:"Tanel Parm",kuu:"Veebruar 2026",pakk:22,kon:17.62,diil:2,dnimed:"Ristimäe RÕ, Arkmanni RÕ",tul:600,märk:""},
+    {nimi:"Tanel Parm",kuu:"Märts 2026",pakk:27,kon:20.32,diil:4,dnimed:"Mäeoru RÕ, Veskijärve RÕ, Lauri RÕ, Tulbasoo RÕ",tul:1600,märk:"⭐ Parim kuu!"},
+    {nimi:"Tanel Parm",kuu:"Mai 2026",pakk:17,kon:17.1,diil:2,dnimed:"Otto-Pille RÕ, Luitsepa RÕ",tul:600,märk:""},
+    {nimi:"Kristiina Rinne",kuu:"Mai 2025",pakk:0,kon:6.55,diil:3,dnimed:"Matokese RÕ, Jaagu-Antsu RÕ, Pulli RÕ",tul:0,märk:"1641 tm juurde ostetud"}
+  ]
+};
+
+function D(){try{var d=localStorage.getItem('eramaa3');if(d)return JSON.parse(d);}catch(e){}return JSON.parse(JSON.stringify(DEF));}
+function S(d){try{localStorage.setItem('eramaa3',JSON.stringify(d));}catch(e){}}
+function f(n){return Math.round(n).toLocaleString('et-EE');}
+function fe(n){return(n>=0?'+':'')+Math.round(n).toLocaleString('et-EE')+' €';}
+function fp(p){return Math.round(p*100)+'%';}
+function getRoll(d,n){var t=d.tiim.find(function(x){return x.nimi===n;});return t?t.roll:'Assistent';}
+
+function init(){
+  fillSelects();
+  renderDashboard();
+}
+
+function fillSelects(){
+  var d=D();
+  KUU_ORDER.forEach(function(k){
+    ['f-kuu','a-kuu'].forEach(function(id){
+      var o=document.createElement('option');
+      o.value=k;o.textContent=k;
+      if(k==='Juuni 2026')o.selected=true;
+      document.getElementById(id).appendChild(o);
+    });
+  });
+  var sel=document.getElementById('a-nimi');
+  d.tiim.forEach(function(t){
+    var o=document.createElement('option');
+    o.value=t.nimi;o.textContent=t.nimi+' ('+t.roll+')';
+    sel.appendChild(o);
+  });
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='dashboard')renderDashboard();
+  if(id==='tiim')renderTiim();
+  if(id==='seaded')renderSeaded();
+}
+
+function renderDashboard(){
+  var d=D();
+  var kuud=d.kuud.slice().sort(function(a,b){return KUU_ORDER.indexOf(a.kuu)-KUU_ORDER.indexOf(b.kuu);});
+  if(!kuud.length){
+    document.getElementById('dash-kpi').innerHTML='<div class="empty"><div class="empty-icon">📊</div><p>Andmed puuduvad</p></div>';
+    return;
+  }
+  var tE=kuud.reduce(function(s,k){return s+k.ees;},0);
+  var tT=kuud.reduce(function(s,k){return s+(k.teg||0);},0);
+  var tR=kuud.reduce(function(s,k){return s+(k.teg||0)*k.kat-k.kul;},0);
+  var kasumK=kuud.filter(function(k){return (k.teg||0)*k.kat-k.kul>0;}).length;
+  var pct=tT/tE;
+  var vK=kuud[kuud.length-1];
+  var vR=vK?(vK.teg||0)*vK.kat-vK.kul:0;
+
+  document.getElementById('dash-sub').textContent=kuud.length+' kuud andmeid · Viimane: '+(vK?vK.kuu:'—');
+  document.getElementById('dash-kpi').innerHTML=
+    kb('Täitmine kokku',fp(pct),pct>=1?'good':'bad',pct>=1?'g':'r')+
+    kb('Tegelik kokku',f(tT)+' tm','','')+
+    kb('Koondsaldo',fe(tR),tR>=0?'good':'bad',tR>=0?'g':'r')+
+    kb('Kasum kuud',kasumK+'/'+kuud.length,kasumK>kuud.length/2?'good':'bad','')+
+    kb('Viimane kuu',fe(vR),vR>=0?'good':'bad',vR>=0?'g':'r')+
+    kb('Nullpunkt','3 500 tm','gold','');
+
+  var tb=document.getElementById('dash-kuud');tb.innerHTML='';
+  kuud.forEach(function(k,i){
+    var teg=k.teg||0,pct=teg/k.ees,res=teg*k.kat-k.kul;
+    var bc=pct>=1?'#2A7A3A':pct>=0.85?'#C8A84B':'#B84040';
+    var bw=Math.min(100,Math.round(pct*100));
+    var prev=i>0?kuud[i-1]:null;
+    var prevR=prev?(prev.teg||0)*prev.kat-prev.kul:null;
+    var tr=tb.insertRow();
+    tr.innerHTML='<td><strong>'+k.kuu+'</strong></td><td style="color:var(--text-muted)">'+f(k.ees)+' tm</td><td><strong>'+f(teg)+' tm</strong></td>'+
+      '<td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+bw+'%;background:'+bc+'"></div></div><span class="bar-pct" style="color:'+bc+'">'+fp(pct)+'</span></div></td>'+
+      '<td><span class="pill '+(res>=0?'pill-g':'pill-r')+'">'+fe(res)+'</span>'+(prevR!==null?(res>prevR?' <span style="color:#2A7A3A;font-size:11px">↑</span>':' <span style="color:#B84040;font-size:11px">↓</span>'):'')+'</td>'+
+      '<td style="font-size:11px;color:var(--text-muted)">'+(k.kom||'')+'</td>';
+  });
+
+  var tt=document.getElementById('dash-tiim');tt.innerHTML='';
+  var aMap={};
+  d.andmed.forEach(function(a){
+    if(!aMap[a.nimi])aMap[a.nimi]={kuud:0,pakk:0,diil:0,tul:0};
+    aMap[a.nimi].kuud++;aMap[a.nimi].pakk+=a.pakk||0;
+    aMap[a.nimi].diil+=a.diil||0;aMap[a.nimi].tul+=a.tul||0;
+  });
+  d.tiim.forEach(function(t){
+    var a=aMap[t.nimi]||{kuud:0,pakk:0,diil:0,tul:0};
+    var konv=a.pakk>0?a.diil/a.pakk*100:0;
+    var tr=tt.insertRow();
+    tr.innerHTML='<td><strong>'+t.nimi+'</strong></td>'+
+      '<td><span class="tag '+(t.roll==='Ostujuht'?'tag-gold':'tag-b')+'">'+t.roll+'</span></td>'+
+      '<td>'+a.kuud+'</td><td>'+a.pakk+'</td>'+
+      '<td><span class="tag '+(a.diil>0?'tag-g':'tag-b')+'">'+a.diil+' diili</span></td>'+
+      '<td><span class="pill '+(konv>=10?'pill-g':'pill-y')+'">'+konv.toFixed(1)+'%</span></td>'+
+      '<td><span class="pill '+(a.tul>0?'pill-g':'pill-y')+'">'+f(a.tul)+' €</span></td>';
+  });
+}
+
+function kb(lbl,val,cardCls,valCls){
+  return '<div class="kpi'+(cardCls?' '+cardCls:'')+'"><div class="kpi-lbl">'+lbl+'</div><div class="kpi-val'+(valCls?' '+valCls:'')+'">'+val+'</div></div>';
+}
+
+function loadKuu(){
+  var kuu=document.getElementById('f-kuu').value;
+  var d=D();
+  var r=d.kuud.find(function(k){return k.kuu===kuu;});
+  if(r){
+    document.getElementById('f-ees').value=r.ees||'';
+    document.getElementById('f-teg').value=r.teg||'';
+    document.getElementById('f-kul').value=r.kul||14000;
+    document.getElementById('f-kat').value=r.kat||4;
+    document.getElementById('f-kom').value=r.kom||'';
+    document.getElementById('alert-kuu').innerHTML='<div class="alert alert-y">Olemasolev kuu — muudad kirjet.</div>';
+  } else {
+    document.getElementById('alert-kuu').innerHTML='';
+    clearKuu();
+  }
+}
+
+function saveKuu(){
+  var kuu=document.getElementById('f-kuu').value;
+  var ees=parseFloat(document.getElementById('f-ees').value);
+  var teg=parseFloat(document.getElementById('f-teg').value);
+  var kul=parseFloat(document.getElementById('f-kul').value)||14000;
+  var kat=parseFloat(document.getElementById('f-kat').value)||4;
+  var kom=document.getElementById('f-kom').value;
+  if(isNaN(ees)||isNaN(teg)){
+    document.getElementById('kuu-preview').innerHTML='<div class="alert alert-r">Täida eesmärk ja tegelik maht!</div>';return;
+  }
+  var d=D();
+  var idx=d.kuud.findIndex(function(k){return k.kuu===kuu;});
+  var rec={kuu:kuu,ees:ees,teg:teg,kul:kul,kat:kat,kom:kom};
+  if(idx>=0)d.kuud[idx]=rec;else d.kuud.push(rec);
+  S(d);
+  var res=teg*kat-kul;
+  document.getElementById('kuu-preview').innerHTML='<div class="alert alert-g">✓ Salvestatud! '+kuu+': '+f(teg)+' tm → <strong>'+fe(res)+'</strong></div>';
+  document.getElementById('alert-kuu').innerHTML='<div class="alert alert-y">Olemasolev kuu — muudad kirjet.</div>';
+}
+
+function clearKuu(){
+  ['f-ees','f-teg','f-kom'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('f-kul').value=14000;
+  document.getElementById('f-kat').value=4;
+  document.getElementById('kuu-preview').innerHTML='';
+}
+
+function saveTiim(){
+  var nimi=document.getElementById('a-nimi').value;
+  var kuu=document.getElementById('a-kuu').value;
+  var pakk=parseInt(document.getElementById('a-pakk').value)||0;
+  var kon=parseFloat(document.getElementById('a-kon').value)||0;
+  var diil=parseInt(document.getElementById('a-diil').value)||0;
+  var dnimed=document.getElementById('a-dnimed').value;
+  var tul=parseInt(document.getElementById('a-tul').value)||0;
+  var märk=document.getElementById('a-märk').value;
+  var d=D();
+  var idx=d.andmed.findIndex(function(a){return a.nimi===nimi&&a.kuu===kuu;});
+  var rec={nimi:nimi,kuu:kuu,pakk:pakk,kon:kon,diil:diil,dnimed:dnimed,tul:tul,märk:märk};
+  if(idx>=0)d.andmed[idx]=rec;else d.andmed.push(rec);
+  S(d);
+  document.getElementById('alert-tiim').innerHTML='<div class="alert alert-g">✓ Salvestatud! '+nimi+' — '+kuu+': '+diil+' diili, '+f(tul)+' €</div>';
+  clearTiim();
+}
+
+function clearTiim(){
+  ['a-pakk','a-kon','a-diil','a-dnimed','a-tul','a-märk'].forEach(function(id){document.getElementById(id).value='';});
+}
+
+function renderTiim(){
+  var d=D();
+  var cards='',detail='';
+  d.tiim.forEach(function(t){
+    var rows=d.andmed.filter(function(a){return a.nimi===t.nimi;});
+    rows.sort(function(a,b){return KUU_ORDER.indexOf(a.kuu)-KUU_ORDER.indexOf(b.kuu);});
+    var tP=rows.reduce(function(s,r){return s+(r.pakk||0);},0);
+    var tD=rows.reduce(function(s,r){return s+(r.diil||0);},0);
+    var tT=rows.reduce(function(s,r){return s+(r.tul||0);},0);
+    var tK=rows.reduce(function(s,r){return s+(r.kon||0);},0);
+    var konv=tP>0?tD/tP*100:0;
+    var isOJ=t.roll==='Ostujuht';
+
+    cards+='<div class="asst-card">'+
+      '<div class="asst-card-hd '+(isOJ?'ostujuht':'assistent')+'">'+
+        '<div class="asst-card-name">'+t.nimi+'</div>'+
+        '<div class="asst-card-sub"><span class="tag '+(isOJ?'tag-gold':'tag-b')+'" style="font-size:9px">'+t.roll+'</span> · '+rows.length+' kuud</div>'+
+      '</div>'+
+      '<div class="asst-card-body">'+
+        stat('Pakkumisi kokku',tP)+
+        stat('Diile','<span class="tag '+(tD>0?'tag-g':'tag-b')+'">'+tD+'</span>')+
+        stat('Konversioon','<span class="pill '+(konv>=10?'pill-g':'pill-y')+'">'+konv.toFixed(1)+'%</span>')+
+        stat('Kõneminutid',tK.toFixed(1)+'h')+
+        stat('Tulemus','<span class="pill '+(tT>0?'pill-g':'pill-y')+'">'+f(tT)+' €</span>')+
+      '</div></div>';
+
+    if(!rows.length){
+      detail+='<div class="card"><div class="card-hd">'+t.nimi+' — detailvaade</div><div class="empty"><div class="empty-icon">📋</div><p>Andmed puuduvad</p></div></div>';
+      return;
+    }
+    detail+='<div class="card"><div class="card-hd">'+t.nimi+' — kuude detailvaade</div>'+
+      '<table><thead><tr><th>Kuu</th><th>Pakkumisi</th><th>Kõneminutid</th><th>Diile</th><th>Konversioon</th><th>Diilide nimed</th><th>Tulemus</th><th>Märkus</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var k=r.pakk>0?r.diil/r.pakk*100:0;
+      detail+='<tr><td><strong>'+r.kuu+'</strong></td><td>'+r.pakk+'</td><td>'+r.kon.toFixed(1)+'h</td>'+
+        '<td><span class="tag '+(r.diil>0?'tag-g':'tag-b')+'">'+r.diil+'</span></td>'+
+        '<td><span class="pill '+(k>=10?'pill-g':'pill-y')+'">'+k.toFixed(1)+'%</span></td>'+
+        '<td style="font-size:11px;color:var(--text-muted)">'+(r.dnimed||'—')+'</td>'+
+        '<td><span class="pill '+(r.tul>0?'pill-g':'pill-y')+'">'+f(r.tul)+' €</span></td>'+
+        '<td style="font-size:11px;color:var(--text-muted)">'+(r.märk||'')+'</td></tr>';
+    });
+    detail+='</tbody></table></div>';
+  });
+  document.getElementById('tiim-cards').innerHTML=cards;
+  document.getElementById('tiim-detail').innerHTML=detail;
+}
+
+function stat(l,v){
+  return '<div class="asst-stat"><span class="asst-stat-lbl">'+l+'</span><span class="asst-stat-val">'+v+'</span></div>';
+}
+
+function renderSeaded(){
+  var d=D();
+  var html='';
+  for(var i=0;i<d.tiim.length;i++){
+    var t=d.tiim[i];
+    var tagCls=t.roll==='Ostujuht'?'tag-gold':'tag-b';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--cream);border-radius:8px;margin-bottom:6px;">';
+    html+='<span style="font-size:13px;font-weight:500">'+t.nimi+' <span class="tag '+tagCls+'">'+t.roll+'</span></span>';
+    html+='<button class="btn btn-danger btn-sm" onclick="removeTiimiliige('+i+')">Eemalda</button></div>';
+  }
+  document.getElementById('tiim-list').innerHTML=html||'<p style="color:var(--text-muted);font-size:13px">Tiim on tühi</p>';
+}
+
+function addTiimiliige(){
+  var nimi=document.getElementById('new-nimi').value.trim();
+  var roll=document.getElementById('new-roll').value;
+  if(!nimi)return;
+  var d=D();
+  if(!d.tiim.find(function(t){return t.nimi===nimi;})){
+    d.tiim.push({nimi:nimi,roll:roll});
+    S(d);
+    var sel=document.getElementById('a-nimi');
+    var o=document.createElement('option');
+    o.value=nimi;o.textContent=nimi+' ('+roll+')';
+    sel.appendChild(o);
+    document.getElementById('new-nimi').value='';
+    renderSeaded();
+  }
+}
+
+function removeTiimiliige(idx){
+  var d=D();
+  var nimi=d.tiim[idx]?d.tiim[idx].nimi:'';
+  if(!confirm('Eemalda '+nimi+' tiimist? Andmed jäävad alles.'))return;
+  d.tiim.splice(idx,1);
+  S(d);
+  renderSeaded();
+}
+function exportData(){
+  var d=D();
+  var blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='eramaa_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+
+function importData(e){
+  var file=e.target.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{localStorage.setItem('eramaa3',ev.target.result);alert('Imporditud!');location.reload();}
+    catch(err){alert('Viga: vigane fail');}
+  };r.readAsText(file);
+}
+
+function clearAll(){
+  if(!confirm('Kustutad KÕIK andmed?'))return;
+  localStorage.removeItem('eramaa3');location.reload();
+}
+
+init();
+</script>
+</body>
+</html>
